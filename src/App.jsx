@@ -1,9 +1,44 @@
-import { useEffect, useState, useRef, use } from "react";
+import { useEffect, useState, useRef} from "react";
 import { FaLinkedin, FaInstagram } from "react-icons/fa";
 import { supabase } from "./supabase";
+import { Link } from "react-router-dom";
 import "./App.css";
 
 export default function App() {
+
+  async function getVisitorLocation() {
+    const res = await 
+    fetch("https://ipapi.co/json/");
+    const data = await res.json();
+    return {
+      country: data.country_name,
+      latitude: data.latitude,
+      longitude: data.longitude,
+    };
+  }
+  async function updateCountryVisit() {
+    const loc = await getVisitorLocation();
+    const { data } = await supabase
+      .from("country_visits")
+      .select("*")
+      .eq("country", loc.country)
+      .single();
+      
+    if (data) {
+      await supabase
+        .from("country_visits")
+        .update({ count: data.count + 1 })
+        .eq("country", loc.country);
+    } else {
+      await supabase
+        .from("country_visits")
+        .insert({ country: loc.country,
+          latitude: loc.latitude,
+          longitude: loc.longitude,
+          count: 1,
+        });
+    }
+  }
 
   
   const releaseDate = new Date("2026-12-18T00:00:00Z");
@@ -111,6 +146,10 @@ export default function App() {
     incrementVisitors();
   }, []);
 
+  useEffect(() => {
+    updateCountryVisit();
+  }, []);
+
   const format = (val) => String(val).padStart(2, "0");
 
   return (
@@ -190,6 +229,11 @@ export default function App() {
       </div>
       <div className="visitor-counter">
         👁️ {visitors.toLocaleString()} Avengers fans visited 
+      </div>
+      <div className="map-link">
+        <Link to="/map">
+          See Global Map 🌍
+        </Link>
       </div>
 
     </div>
