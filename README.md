@@ -84,17 +84,17 @@ All calculations are performed using *UTC time*, ensuring consistent behavior re
 ## 🧠 System Flow
 
 
-Visitor opens the website
-        ↓
-IP geolocation API detects location
-        ↓
-Visitor country stored in Supabase
-        ↓
-Realtime database event triggered
-        ↓
-React listener receives update
-        ↓
-Global map updates instantly
+1. Visitor opens the website
+
+2. IP geolocation API detects location
+   
+3. Visitor country stored in Supabase
+        
+4. Realtime database event triggered
+        
+5. React listener receives update
+      
+6. Global map updates instantly
 
 
 ---
