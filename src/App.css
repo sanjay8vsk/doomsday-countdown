@@ -38,6 +38,9 @@ html, body, #root {
   );
   z-index: 1;
 }
+.overlay {
+  pointer-events: none;
+}
 
 .content {
   position: relative;
@@ -131,11 +134,41 @@ html, body, #root {
   letter-spacing: 2px;
   text-transform: uppercase;
 
-  color: white;
+  color: #8CFF3F;
   opacity: 0.85;
 
   font-weight: 500;
 
   text-shadow: 
     0 0 10px rgba(255,255,255,0.8);
+}
+
+
+.map-link {
+  position: absolute;
+  bottom: 70px;
+  width: 100%;
+  text-align: center;
+  text-transform: uppercase;
+
+}
+.map-link a {
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  text-decoration: none;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  padding: 8px 18px;
+  border-radius: 8px;
+}
+
+.map-link a:hover {
+  color: #ffffff;
+  background: rgba(140, 255, 63, 0.15);
+  box-shadow: 0 0 8px rgba(140, 255, 63, 0.9),
+              0 0 20px rgba(140, 255, 63, 0.6),
+              inset 0 0 10px rgba(140, 255, 63, 0.3) ;
+  transform: scale(1.05);            
+  
 }
