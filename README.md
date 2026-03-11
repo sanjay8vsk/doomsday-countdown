@@ -4,7 +4,7 @@
 
 A cinematic web application that counts down to a global event while visualizing where viewers are watching from around the world in real time.
 
-What began as a simple countdown timer has evolved into a *live global analytics experience*, combining geolocation, real-time database updates, and interactive data visualization.
+This application began as a simple countdown timer and has evolved into a *live global analytics experience*, combining geolocation, real-time database updates, and interactive data visualization.
 
 ---
 
