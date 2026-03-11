@@ -1,5 +1,7 @@
 # MCU Doomsday Countdown 
 
+---
+
 A cinematic web application that counts down to a global event while visualizing where viewers are watching from around the world in real time.
 
 What began as a simple countdown timer has evolved into a *live global analytics experience*, combining geolocation, real-time database updates, and interactive data visualization.
@@ -85,7 +87,7 @@ All calculations are performed using *UTC time*, ensuring consistent behavior re
    
 3. Visitor country stored in Supabase
         
-4. Realtime database event triggered
+4. Real-time database event triggered
         
 5. React listener receives update
       
@@ -161,8 +163,7 @@ VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ---
 
-## 👨‍💻 Author
+## 👨‍💻 Developed by 
 
 *Sanjay Babu*
 
-Building interactive and data-driven web applications.
