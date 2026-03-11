@@ -16,6 +16,24 @@ export default function GlobalMap() {
 
   useEffect(() => {
     fetchLocations();
+    const channel = supabase
+        .channel("realtime-country")
+        .on(
+            "postgres_changes",
+            {
+                event: "*",
+                schema: "public",
+                table: "country_visits",
+            },
+            () => {
+                fetchLocations();
+            }
+        )
+        .subscribe();
+
+    return () => {
+        supabase.removeChannel(channel);
+    };
   }, []);
 
   async function fetchLocations() {
@@ -95,12 +113,13 @@ export default function GlobalMap() {
           >
 
             <circle
-              r={Math.min(Math.sqrt(loc.count) * 2, 10)}
+              r={6}
               fill="#ff3b3b"
             />
 
             <circle
-              r={Math.min(Math.sqrt(loc.count) * 3, 16)}
+                className="pulse"
+              r={6}
               fill="rgba(255,0,0,0.25)"
             />
 
