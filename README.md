@@ -63,21 +63,16 @@ The timer begins *counting how much time has passed since the event occurred*.
 
 ### Logic Flow
 
+- If **Current Time < Event Date**
+  - Application runs in **Countdown Mode**
+  - Displays: **DOOMSDAY IS COMING**
 
-Current Time < Event Date
-        ↓
-Countdown Mode
-        ↓
-Display: DOOMSDAY IS COMING
-
-Current Time ≥ Event Date
-        ↓
-Elapsed Time Mode
-        ↓
-Display: SINCE DOOMSDAY
+- If **Current Time >= Event Date**
+  - Application switches to **Elapsed Time Mode**
+  - Displays as SINCE DOOMSDAY 
 
 
-All calculations are performed using *UTC time*, ensuring consistent behavior regardless of the visitor's timezone.
+All calculations are performed using *UTC time*, ensuring consistent behavior regardless of the user's timezone.
 
 ---
 
@@ -111,8 +106,11 @@ All calculations are performed using *UTC time*, ensuring consistent behavior re
 - Supabase (PostgreSQL)
 - Supabase Realtime
 
-### External Services
+### APIs
 - IP Geolocation API
+
+### Deployment
+- Vercel
 
 ---
 
@@ -149,15 +147,6 @@ Create a .env file in the root directory.
 VITE_SUPABASE_URL=your_supabase_url
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
-
----
-
-## 🌐 Deployment
-
-The project can be deployed using modern hosting platforms such as:
-
-- Vercel (recommended)
-- Netlify
 
 ---
 
