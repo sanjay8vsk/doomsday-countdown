@@ -1,4 +1,4 @@
-# Doomsday Countdown — Real-Time Global Visitor Tracker
+# MCU Doomsday Countdown 
 
 A cinematic web application that counts down to a global event while visualizing where viewers are watching from around the world in real time.
 
@@ -145,6 +145,7 @@ Create a .env file in the root directory.
 
 
 VITE_SUPABASE_URL=your_supabase_url
+
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 
