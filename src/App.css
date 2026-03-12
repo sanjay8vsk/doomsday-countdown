@@ -172,3 +172,25 @@ html, body, #root {
   transform: scale(1.05);            
   
 }
+
+
+.pulse {
+  animation: pulse 2s infinite;
+  opacity: 0.75;
+  transform-origin: center;
+}
+
+@keyframes pulse {
+  0% {
+    r: 6;
+    opacity: 0.8;
+  }
+  50% {
+    r: 18;
+    opacity: 0.3;
+  }
+  100% {
+    r: 20;
+    opacity: 0;
+  }
+}
