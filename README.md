@@ -41,6 +41,8 @@ This creates a *shared global experience*, allowing users to see how many others
 - 🎬 *Cinematic User Interface*  
   Designed with a minimal, immersive visual style.
 
+- 🔊 *Cinematic Tick sound*
+  A subtle ticking sound plays during the countdown, creating a suspenseful cinematic experience. 
 ---
 
 ## ⏳ Dynamic Countdown Behavior
