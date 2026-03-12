@@ -125,7 +125,7 @@ All calculations are performed using *UTC time*, ensuring consistent behavior re
 Clone the repository
 
 bash
-git clone https://github.com/YOUR_USERNAME/YOUR_REPO.git
+git clone https://github.com/sanjay8vsk/doomsday-countdown.git
 cd YOUR_REPO
 
 
