@@ -2,6 +2,7 @@ import { useEffect, useState, useRef} from "react";
 import { FaLinkedin, FaInstagram } from "react-icons/fa";
 import { supabase } from "./supabase";
 import { Link } from "react-router-dom";
+import { startDynamicFavicon } from "./dynamicFavicon";
 import "./App.css";
 
 export default function App() {
@@ -141,6 +142,10 @@ export default function App() {
     return () => clearInterval(timer);
 
   }, [soundEnabled]);
+
+  useEffect(() => {
+    startDynamicFavicon();
+  }, []);
 
   useEffect(() => {
     incrementVisitors();
