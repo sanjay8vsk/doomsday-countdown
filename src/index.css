@@ -65,3 +65,40 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+.marvel-title {
+  font-family: "Orbitron", sans-serif;
+  font-size: 34px;
+  letter-spacing: 5px;
+  text-align: center;
+  color: "#8CFF3F";
+  position: relative;
+  text-transform: uppercase;
+
+  text-shadow: 
+    0 0 8px rgba(140, 255, 63, 0.8),
+    0 0 20px rgba(140, 255, 63, 0.6),
+    0 0 35px rgba(140, 255, 63, 0.4);
+}
+
+.marvel-title::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+
+  background: linear-gradient(120deg, transparent, rgba(140, 255, 63, 0.6), transparent);
+
+  animation: scan 3s infinite;
+}
+
+@keyframes scan {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 120%;
+  }   
+}

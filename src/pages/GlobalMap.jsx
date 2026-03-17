@@ -62,9 +62,11 @@ export default function GlobalMap() {
       }}
     >
 
-      <h2
+      {/* <h2
         style={{
           color: "#8CFF3F",
+          fontFamily: "Orbitron, sans-serif",
+          fontWeight: "600",
           marginTop: "10px",
           marginBottom: "10px",
           letterSpacing: "3px",
@@ -74,7 +76,8 @@ export default function GlobalMap() {
         }}
       >
          Marvel Fans Watching Worldwide
-      </h2>
+      </h2> */}
+      <h2 className="marvel-title">Marvel Fans Watching Worldwide</h2>
       <div className="map-container">
       <ComposableMap
         projection="geoMercator"
