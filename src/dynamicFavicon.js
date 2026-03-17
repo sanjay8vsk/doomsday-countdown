@@ -1,6 +1,8 @@
 export function startDynamicFavicon() {
   let angle = 0;
 
+  const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;
+
   setInterval(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 32;
@@ -11,9 +13,13 @@ export function startDynamicFavicon() {
     const centerX = 16;
     const centerY = 16;
 
-    const ringColor = "#39FF14";
-    const arcColor = "#00FFA6";
-    const coreColor = "#C7FFE8";
+    // const ringColor = "#39FF14";
+    // const arcColor = "#00FFA6";
+    // const coreColor = "#C7FFE8";
+
+    const ringColor = isDarkMode ? "#39FF14" : "#1E7F1E";
+    const arcColor = isDarkMode ? "#00FFA6" : "#2c9e2c";
+    const coreColor = isDarkMode ? "#C7FFE8" : "#8FD88F";
 
     ctx.clearRect(0, 0, 32, 32);
 
