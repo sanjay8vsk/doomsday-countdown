@@ -3,6 +3,7 @@ import { FaLinkedin, FaInstagram } from "react-icons/fa";
 import { supabase } from "./supabase";
 import { Link } from "react-router-dom";
 import { startDynamicFavicon } from "./dynamicFavicon";
+import { Share2 } from "lucide-react";
 import "./App.css";
 
 export default function App() {
@@ -157,6 +158,20 @@ export default function App() {
 
   const format = (val) => String(val).padStart(2, "0");
 
+  const shareCountdown = () => {
+    const shareData = {
+      title: "Doomsday Countdown",
+      text: "Join the global Doomsdaty Countdown", url:window.location.href
+    };
+
+    if (navigator.share) {
+      navigator.share(shareData);
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert("Link copied to clipboard!");
+    }
+  };
+
   return (
     <div
       className="fullscreen"
@@ -180,6 +195,9 @@ export default function App() {
         >
           <FaInstagram size={24} />
         </a>
+        <div className="social-icon" onClick={shareCountdown}>
+          <Share2 size={24} />
+        </div>
       </div>
 
       <div className="overlay" />
