@@ -13,6 +13,7 @@ const geoUrl =
 export default function GlobalMap() {
 
   const [locations, setLocations] = useState([]);
+  const isMobile = window.innerWidth < 768;
 
   useEffect(() => {
     fetchLocations();
@@ -64,30 +65,28 @@ export default function GlobalMap() {
       <h2
         style={{
           color: "#8CFF3F",
-          marginTop: "25px",
-          marginBottom: "20px",
-          letterSpacing: "2px",
+          marginTop: "10px",
+          marginBottom: "10px",
+          letterSpacing: "3px",
           textAlign: "center",
-          textShadow: `0 0 8px rgba(140, 255, 63, 0.8),
-                        0 0 20px rgba(140, 255, 63, 0.6),
-                        0 0 35px rgba(140, 255, 63, 0.4)`
+          textShadow: `0 0 6px rgba(140, 255, 63, 0.8),
+                        0 0 15px rgba(140, 255, 63, 0.5)`
         }}
       >
          Marvel Fans Watching Worldwide
       </h2>
-
+      <div className="map-container">
       <ComposableMap
         projection="geoMercator"
         projectionConfig={{
-          scale: 105,
-          center: [0, 20]
+          scale: isMobile ? 95 : 100,
+          center: [0, -12]
         }}
-        width={1000}
-        height={520}
+        
         style={{
-          width: "95%",
-          maxWidth: "1200px",
-          height: "auto"
+          width: "100%",
+          maxWidth: "1300px",
+          height: "93vh"
         }}
       >
 
@@ -128,6 +127,7 @@ export default function GlobalMap() {
         ))}
 
       </ComposableMap>
+      </div>
 
     </div>
 

@@ -199,3 +199,27 @@ html, body, #root {
     opacity: 0;
   }
 }
+
+
+@media (max-width: 768){
+  h2{
+    font-size: 1.4rem;
+    text-align: center;
+  }
+
+}
+
+.map-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  align-items: center;
+  
+}
+
+.map-container svg {
+  width: 100%;
+  height: auto;
+  max-width: 1200px;
+}
