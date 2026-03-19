@@ -156,6 +156,10 @@ export default function App() {
     updateCountryVisit();
   }, []);
 
+  useEffect(() => {
+    document.title = "⚡ Doomsday Countdown";
+  }, []);
+
   const format = (val) => String(val).padStart(2, "0");
 
   const shareCountdown = () => {

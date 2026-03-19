@@ -49,6 +49,10 @@ export default function GlobalMap() {
 
   }
 
+  useEffect(() => {
+    document.title = "MCU Fan Network";
+  }, []);
+
   return (
 
     <div
