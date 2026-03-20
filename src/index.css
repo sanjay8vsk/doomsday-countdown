@@ -69,7 +69,7 @@ button:focus-visible {
 .marvel-title {
   font-family: "Orbitron", sans-serif;
   font-size: 34px;
-  letter-spacing: 5px;
+  letter-spacing: 0.12px;
   text-align: center;
   color: "#8CFF3F";
   position: relative;
