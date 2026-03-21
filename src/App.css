@@ -223,3 +223,52 @@ html, body, #root {
   height: auto;
   max-width: 1200px;
 }
+
+.map-footer {
+  position: absolute;
+  bottom: 18px;
+  width: 100%;
+  text-align: center;
+  font-size: 11px;
+  color: rgba(255,255,255,0.45);
+  letter-spacing: 0.12em;
+  z-index: 10;
+
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  opacity: 0;
+  animation: fadeIn 2s ease forwards;
+}
+
+.map-footer span {
+  color : #7CFFB2;
+  
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* .map-footer .highlight {
+  color: #8CFF3F;
+  font-weight: 500;
+  text-shadow: 0 0 6px rgba(140, 255, 63, 0.9), 0 0 12px rgba(140, 255, 63, 0.6);
+} */
+
+.map-footer .highlight {
+  color: #7CFFB2;
+}
+
+.map-container::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+  pointer-events: none;
+  z-index: 5;
+}
