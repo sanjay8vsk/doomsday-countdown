@@ -237,7 +237,7 @@ html, body, #root {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   opacity: 0;
-  animation: fadeIn 8s ease forwards;
+  animation: fadeIn 7s ease forwards;
 }
 
 .map-footer span {
