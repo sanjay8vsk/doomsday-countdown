@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { supabase } from "../supabase";
 import {
   ComposableMap,
@@ -13,7 +13,7 @@ const geoUrl =
 export default function GlobalMap() {
 
   const [locations, setLocations] = useState([]);
-  const isMobile = window.innerWidth < 768;
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
 
   useEffect(() => {
     fetchLocations();
@@ -22,12 +22,12 @@ export default function GlobalMap() {
         .on(
             "postgres_changes",
             {
-                event: "*",
+                event: "INSERT",
                 schema: "public",
                 table: "country_visits",
             },
-            () => {
-                fetchLocations();
+            (payload) => {
+                setLocations((prev) => [...prev, { ...payload.new, isNew: true }]);
             }
         )
         .subscribe();
@@ -96,6 +96,15 @@ export default function GlobalMap() {
           height: "93vh"
         }}
       >
+        <defs>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+            <feMerge>
+              <feMergeNode in="coloredBlur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+           </filter> 
+        </defs>
 
         <Geographies geography={geoUrl}>
           {({ geographies }) =>
@@ -114,20 +123,41 @@ export default function GlobalMap() {
         {locations.map((loc, i) => (
 
           <Marker
-            key={i}
-            coordinates={[loc.longitude, loc.latitude]}
+            key={`${loc.country}-${loc.latitude}-${loc.longitude}`}
+            coordinates={[loc.longitude, loc.latitude]} 
           >
 
             <circle
-              r={6}
-              fill="#ff3b3b"
-            />
-
+            r={6}
+            fill="none"
+            stroke="#ff3b3b"
+            strokeWidth={2}
+            opacity="0.6"
+            >
+              <animate 
+              attributeName="r"
+              from="6"
+              to="30"
+              dur="2s"
+              repeatCount="indefinite"
+              />
+              <animate 
+              attributeName="opacity"
+              from="0.6"
+              to="0"
+              dur="2s"
+              repeatCount="indefinite"
+              />
+            </circle>
             <circle
-                className="pulse"
-              r={6}
-              fill="rgba(255,0,0,0.25)"
-            />
+              r={5}
+              fill="#ff3b3b"
+              style={{
+                filter: "drop-shadow(0 0 6px #ff3b3b)"
+              }}
+              />
+
+            
 
           </Marker>
 

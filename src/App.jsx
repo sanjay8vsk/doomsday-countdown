@@ -4,6 +4,7 @@ import { supabase } from "./supabase";
 import { Link } from "react-router-dom";
 import { startDynamicFavicon } from "./dynamicFavicon";
 import { Share2 } from "lucide-react";
+import ArcCursor from "./ArcCursor";
 import "./App.css";
 
 export default function App() {
@@ -149,6 +150,35 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const elements = document.querySelectorAll("button, a");
+
+    const handleEnter = () => {
+      document.body.classList.add("interactive");
+    }
+    const handleLeave = () => {
+      document.body.classList.remove("interactive");
+    };
+    elements.forEach(el => {
+      el.addEventListener("mouseenter", handleEnter);
+      el.addEventListener("mouseleave", handleLeave);
+    });
+
+    return () => {
+      elements.forEach(el => {
+        el.removeEventListener("mouseenter", handleEnter);
+        el.removeEventListener("mouseleave", handleLeave);
+      });
+    };
+  }, []);
+
+  useEffect(() => {
+    document.body.classList.add("jarvis-mode");
+    return () => {
+      document.body.classList.remove("jarvis-mode");
+    };
+  }, []);
+
+  useEffect(() => {
     incrementVisitors();
   }, []);
 
@@ -177,6 +207,8 @@ export default function App() {
   };
 
   return (
+    <>
+      <ArcCursor />
     <div
       className="fullscreen"
       onClick={() => setSoundEnabled(true)}
@@ -264,5 +296,6 @@ export default function App() {
       </div>
 
     </div>
+    </>
   );
 }

@@ -183,21 +183,20 @@ html, body, #root {
 
 .pulse {
   animation: pulse 2s infinite;
-  opacity: 0.75;
   transform-origin: center;
 }
 
 @keyframes pulse {
   0% {
     r: 6;
-    opacity: 0.8;
+    opacity: 0.6;
   }
-  50% {
-    r: 18;
-    opacity: 0.3;
+  70% {
+    r: 25;
+    opacity: 0.2;
   }
   100% {
-    r: 20;
+    r: 35;
     opacity: 0;
   }
 }
@@ -307,4 +306,99 @@ html, body, #root {
   background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
   pointer-events: none;
   z-index: 0;
+}
+
+
+
+/* Cursor container */
+.arc-cursor {
+  position: fixed;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  transform: scale(0.6);
+  pointer-events: none;
+  z-index: 9999;
+  opacity: 1;
+}
+body.interacting .arc-cursor {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* OUTER RING */
+.arc-outer {
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  border: 2px solid #00eaff;
+  border-radius: 50%;
+
+  box-shadow:
+    0 0 8px #00eaff,
+    0 0 20px #00eaff,
+    inset 0 0 10px #00eaff;
+
+  animation: rotateOuter 6s linear infinite;
+}
+
+/* INNER RING */
+.arc-inner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border: 2px dashed #00eaff;
+  border-radius: 50%;
+  top: 8px;
+  left: 8px;
+
+  animation: rotateInner 2s linear infinite;
+}
+
+/* CORE */
+.arc-core {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: #00eaff;
+  border-radius: 50%;
+  top: 15px;
+  left: 15px;
+
+  box-shadow:
+    0 0 10px #00eaff,
+    0 0 20px #00eaff;
+
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ANIMATIONS */
+
+@keyframes rotateOuter {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes rotateInner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.6;
+  }
+}
+
+body {
+  /* cursor: url('/cursor.png'), auto; */
+  cursor: none;
+}
+
+
+body.jarvis-mode {
+  cursor: none;
 }
