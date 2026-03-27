@@ -316,14 +316,25 @@ html, body, #root {
   transition: opacity 0.2s ease, transform 0.2s ease;
   transform: scale(0.6);
   pointer-events: none;
-  z-index: 9999;
-  opacity: 1;
+  z-index: 999999;
+  opacity: 1 !important;
 }
 body.interacting .arc-cursor {
   opacity: 1;
   transform: scale(1);
 }
 
+
+svg, canvas {
+  pointer-events: none;
+}
+.map-container {
+  position: relative;
+  z-index: 1;
+}
+body, html {
+  overflow: visible;
+}
 /* OUTER RING */
 .arc-outer {
   position: absolute;

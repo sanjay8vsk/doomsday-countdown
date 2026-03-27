@@ -208,7 +208,7 @@ export default function App() {
 
   return (
     <>
-      <ArcCursor />
+      
     <div
       className="fullscreen"
       onClick={() => setSoundEnabled(true)}

@@ -3,11 +3,13 @@ import App from "./App";
 import GlobalMap from "./pages/GlobalMap";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import ArcCursor from "./ArcCursor";
 import './index.css';
 
 ReactDOM.createRoot(document.getElementById("root")).render(
 
   <BrowserRouter>
+      <ArcCursor />
     <Routes>
       <Route path="/" element={<App />} />
       <Route path="/map" element={<GlobalMap />} />

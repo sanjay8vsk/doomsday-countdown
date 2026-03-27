@@ -4,16 +4,22 @@ import { useEffect, useState } from "react";
 
 export default function ArcCursor() {
     const isMobile = window.innerWidth < 768;
-    if (isMobile) return null;
   const [pos, setPos] = useState({ x: 0, y: 0 });
+
+  if (isMobile) return null;
 
   useEffect(() => {
     const move = (e) => {
-      setPos({ x: e.clientX, y: e.clientY });
+        setPos({ x: e.clientX, y: e.clientY })
+        ;
     };
-
+    document.body.classList.add("interacting");
+    
     window.addEventListener("mousemove", move);
-    return () => window.removeEventListener("mousemove", move);
+    return () => {
+      window.removeEventListener("mousemove", move);
+      document.body.classList.remove("interacting");
+    };
   }, []);
 
   return (
