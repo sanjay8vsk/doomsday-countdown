@@ -1,39 +1,59 @@
 import { useEffect, useState } from "react";
 
-
-
 export default function ArcCursor() {
-    const isMobile = window.innerWidth < 768;
-  const [pos, setPos] = useState({ x: 0, y: 0 });
-
-  if (isMobile) return null;
+  const [pos, setPos] = useState(null);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const move = (e) => {
-        setPos({ x: e.clientX, y: e.clientY })
-        ;
+    // detect mobile safely
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
     };
-    document.body.classList.add("interacting");
-    
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+
+    const move = (e) => {
+        setPos({
+            x: e.clientX,
+            y: e.clientY,
+        });
+    };
+
+    const handleEnter = (e) => {
+        setPos({
+            x: e.clientX,
+            y: e.clientY,
+        });
+    };
+
     window.addEventListener("mousemove", move);
+    window.addEventListener("mouseenter", handleEnter);
+
     return () => {
       window.removeEventListener("mousemove", move);
-      document.body.classList.remove("interacting");
+      window.removeEventListener("mouseenter", handleEnter);
+      window.removeEventListener("resize", checkMobile);
     };
   }, []);
 
+  // ❗ IMPORTANT: NO early return before hooks
+
   return (
-    <div
-      className="arc-cursor"
-      style={{
-        left: pos.x,
-        top: pos.y,
-        transform: "translate(-50%, -50%)"
-      }}
-    >
-      <div className="arc-outer" />
-      <div className="arc-inner" />
-      <div className="arc-core" />
-    </div>
+    <>
+      {!isMobile && pos && (
+        <div className="arc-cursor"
+            style={{
+                left: pos.x,
+                top: pos.y,
+                transform: "translate(-50%, -50%)"
+            }}
+        >
+            <div className="arc-outer" />
+            <div className="arc-inner" />
+            <div className="arc-core" />
+        </div>   
+      )}
+    </>
   );
 }

@@ -48,7 +48,8 @@ html, body, #root {
   position: relative;
   z-index: 2;
   text-align: center;
-  transform: translateY(-15%);
+  /* transform: translateY(-15%); */
+  margin-top: -15vh;
 }
 
 /* Header text */
@@ -97,8 +98,10 @@ html, body, #root {
 .colon {
   font-size: clamp(2rem, 6vw, 5.5rem);
   font-weight: 300;
-  transform: translateY(-22%); 
+  transform: translateY(-17%); 
   margin: 0 0.1rem;
+  display: flex;
+  align-items: center;
 }
 
 
@@ -223,6 +226,7 @@ html, body, #root {
 
 .map-container svg {
   position: relative;
+  pointer-events: none;
   z-index: 1;
   width: 100%;
   /* height: auto; */
@@ -314,9 +318,9 @@ html, body, #root {
 .arc-cursor {
   position: fixed;
   transition: opacity 0.2s ease, transform 0.2s ease;
-  transform: scale(0.6);
+  transform: scale(1);
   pointer-events: none;
-  z-index: 999999;
+  z-index: 2147483647;
   opacity: 1 !important;
 }
 body.interacting .arc-cursor {
@@ -325,29 +329,20 @@ body.interacting .arc-cursor {
 }
 
 
-svg, canvas {
-  pointer-events: none;
-}
 .map-container {
   position: relative;
   z-index: 1;
 }
-body, html {
-  overflow: visible;
-}
+
 /* OUTER RING */
 .arc-outer {
   position: absolute;
   width: 40px;
   height: 40px;
-  border: 2px solid #00eaff;
   border-radius: 50%;
+  border: 2px solid #00eaff;
 
-  box-shadow:
-    0 0 8px #00eaff,
-    0 0 20px #00eaff,
-    inset 0 0 10px #00eaff;
-
+  box-shadow: 0 0 8px #00eaff, 0 0 20px #00eaff, inset 0 0 10px #00eaff;
   animation: rotateOuter 6s linear infinite;
 }
 
@@ -356,11 +351,10 @@ body, html {
   position: absolute;
   width: 24px;
   height: 24px;
-  border: 2px dashed #00eaff;
-  border-radius: 50%;
   top: 8px;
   left: 8px;
-
+  border-radius: 50%;
+  border: 2px dashed #00eaff;
   animation: rotateInner 2s linear infinite;
 }
 

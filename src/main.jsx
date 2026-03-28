@@ -5,6 +5,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import ArcCursor from "./ArcCursor";
 import './index.css';
+import { Home } from "lucide-react";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
 
@@ -12,6 +13,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <ArcCursor />
     <Routes>
       <Route path="/" element={<App />} />
+      
       <Route path="/map" element={<GlobalMap />} />
     </Routes>
   </BrowserRouter>

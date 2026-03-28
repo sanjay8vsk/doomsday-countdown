@@ -4,6 +4,7 @@ import { supabase } from "./supabase";
 import { Link } from "react-router-dom";
 import { startDynamicFavicon } from "./dynamicFavicon";
 import { Share2 } from "lucide-react";
+import { Outlet } from "react-router-dom";
 import ArcCursor from "./ArcCursor";
 import "./App.css";
 
