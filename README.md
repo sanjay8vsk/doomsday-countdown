@@ -1,8 +1,11 @@
+**It's Live:**
+https://doomsday-countdown.vercel.app
+
 # MCU Doomsday Countdown 
 
 ---
 
-A cinematic web application that counts down to a global event while visualizing where viewers are watching from around the world in real time.
+A cinematic real-time web application that counts down to a global event while visualizing live user activity across the world
 
 This application began as a simple countdown timer and has evolved into a *live global analytics experience*, combining geolocation, real-time database updates, and interactive data visualization.
 
@@ -42,7 +45,10 @@ This creates a *shared global experience*, allowing users to see how many others
   Designed with a minimal, immersive visual style.
 
 - 🔊 *Cinematic Tick sound*
-  A subtle ticking sound plays during the countdown, creating a suspenseful cinematic experience. 
+  A subtle ticking sound plays during the countdown, creating a suspenseful cinematic experience.
+
+- 🌟 Custom Arc cursor
+  A dynamic, glowing cursor inspired by Arc Reactor, enhancing user interaction.
 ---
 
 ## ⏳ Dynamic Countdown Behavior
