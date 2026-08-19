@@ -24,9 +24,11 @@ a:hover {
 
 body {
   margin: 0;
-  
+
   min-width: 320px;
-  min-height: 100vh;
+  /* dvh, not vh: on mobile 100vh is the *large* viewport, which forced the
+     body taller than the visible area and invited address-bar scrolling. */
+  min-height: 100dvh;
 }
 
 h1 {
@@ -71,11 +73,17 @@ button:focus-visible {
   font-size: 34px;
   letter-spacing: 0.12px;
   text-align: center;
-  color: "#8CFF3F";
+  /* Was quoted ("#8CFF3F"), which is not a valid <color>, so the declaration
+     was dropped and the heading inherited :root -- white in dark mode and
+     #213547 (invisible on black) in light mode. */
+  color: #8CFF3F;
   position: relative;
   text-transform: uppercase;
+  /* Keeps the scan sweep inside the heading; the padding in .map-page >
+     .marvel-title leaves room so the glow is not clipped. */
+  overflow: hidden;
 
-  text-shadow: 
+  text-shadow:
     0 0 8px rgba(140, 255, 63, 0.8),
     0 0 20px rgba(140, 255, 63, 0.6),
     0 0 35px rgba(140, 255, 63, 0.4);
@@ -100,5 +108,12 @@ button:focus-visible {
   }
   100% {
     left: 120%;
-  }   
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marvel-title::after {
+    animation: none;
+    opacity: 0;
+  }
 }

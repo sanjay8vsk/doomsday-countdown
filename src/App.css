@@ -66,7 +66,10 @@ html, body, #root {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.4rem;
+  /* Identical to the old flat 0.4rem at >=640px; only tightens below that,
+     where the digits are already pinned at the clamp() floor and the row had
+     less than a pixel of slack at 320px. */
+  gap: clamp(0.2rem, 1vw, 0.4rem);
   flex-wrap: nowrap;
 }
 
@@ -213,28 +216,54 @@ html, body, #root {
 
 }
 
-.map-container {
-  position: relative;
-  min-height: auto;
+/*
+ * Global map page layout.
+ *
+ * The viewport container owns the page height; the map area takes whatever is
+ * left over. Previously the SVG carried an inline height:93vh, which made the
+ * map decide the page height and pushed the footer and heading out of place.
+ */
+.map-page {
+  height: 100vh;          /* fallback for browsers without dvh */
+  height: 100dvh;
   width: 100%;
-  display: block;
-  justify-content: center;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.map-page > .marvel-title {
+  flex: 0 0 auto;
+  /* shrink-wrap the text rather than stretching to the full page width, so the
+     scan sweep stays over the title instead of banding across the viewport */
+  align-self: center;
+  margin: 0;
+  padding: 0.4em 1em;
+  max-width: 100%;
+}
+
+.map-container {
+  flex: 1 1 auto;
+  min-height: 0;          /* lets the map area shrink instead of overflowing */
+  width: 100%;
+  display: flex;
   align-items: center;
+  justify-content: center;
+  padding: 0 clamp(8px, 2vw, 24px);
   box-sizing: border-box;
-  
+  position: relative;
+  z-index: 1;
 }
 
 .map-container svg {
-  position: relative;
-  pointer-events: none;
-  z-index: 1;
-  width: 100%;
-  /* height: auto; */
-  /* height: 70vh; */
-  height: 50vh;
   display: block;
-  margin: 0 auto;
-  max-width: 1200px;
+  width: 100%;
+  height: 100%;
+  max-width: 1300px;
+  pointer-events: none;
+  /* viewBox now matches the drawn geometry, so the default
+     preserveAspectRatio="xMidYMid meet" centres the map exactly. */
 }
 
 @media (max-width: 768px) {
@@ -243,40 +272,28 @@ html, body, #root {
     line-height: 1.2;
     letter-spacing: 2px;
     text-align: center;
-    margin: 10px 16px;
 
     color: #8CFF3F;
     text-shadow: 0 0 4px rgba(140, 255, 63, 0.6), 0 0 10px rgba(140, 255, 63, 0.4);
   }
-
-  .map-container {
-    height: calc(100dvh - 140px);
-    margin-top: -70px;
-    padding-top: 10px;
-  }
-
-  .map-container svg {
-    height: 42vh;
-  }
 }
 
 .map-footer {
-  position: fixed;
-  bottom: 1vh;
-  width: 100%; 
+  flex: 0 0 auto;          /* sits in flow, so it can never overlap the map */
+  width: 100%;
   text-align: center;
   font-size: 11px;
   color: rgba(255,255,255,0.45);
   letter-spacing: 0.12em;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  z-index: 9999; 
+  padding: clamp(6px, 1.2vh, 14px) 16px;
+  box-sizing: border-box;
+  z-index: 2;
 
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   opacity: 0;
   animation: fadeIn 8s ease forwards;
-  
+
 }
 
 .map-footer span {
@@ -314,24 +331,19 @@ html, body, #root {
 
 
 
-/* Cursor container */
+/* Cursor container.
+ * Must carry the ring's own dimensions: its children are absolutely
+ * positioned and therefore contribute no size, so without an explicit
+ * width/height the box collapsed to 0x0 and translate(-50%, -50%) resolved
+ * to translate(0, 0) -- drawing the reactor 20px down/right of the pointer. */
 .arc-cursor {
   position: fixed;
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  transform: scale(1);
+  width: 40px;
+  height: 40px;
+  transform: translate(-50%, -50%);
   pointer-events: none;
   z-index: 2147483647;
-  opacity: 1 !important;
-}
-body.interacting .arc-cursor {
   opacity: 1;
-  transform: scale(1);
-}
-
-
-.map-container {
-  position: relative;
-  z-index: 1;
 }
 
 /* OUTER RING */
@@ -398,12 +410,32 @@ body.interacting .arc-cursor {
   }
 }
 
-body {
-  /* cursor: url('/cursor.png'), auto; */
-  cursor: none;
+/* Hide the native cursor only on devices that actually have a fine pointer,
+ * and only while the custom cursor is on screen. Previously this was
+ * unconditional, so a narrow desktop window (where ArcCursor unmounted) or the
+ * moment before the first mousemove left the user with no cursor at all. */
+@media (hover: hover) and (pointer: fine) {
+  /* The UA stylesheet sets `a:any-link { cursor: pointer }`, which outranks a
+     rule on <body>, so links showed the native arrow on top of the arc cursor.
+     Interactive elements have to opt out explicitly. */
+  body.arc-cursor-active,
+  body.arc-cursor-active a,
+  body.arc-cursor-active button,
+  body.arc-cursor-active .social-icon {
+    cursor: none;
+  }
 }
 
+/* Reduced motion: keep the page usable and legible, drop the looping motion. */
+@media (prefers-reduced-motion: reduce) {
+  .arc-outer,
+  .arc-inner,
+  .arc-core {
+    animation: none;
+  }
 
-body.jarvis-mode {
-  cursor: none;
+  .map-footer {
+    animation: none;
+    opacity: 1;            /* the fade-in never runs, so show it outright */
+  }
 }

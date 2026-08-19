@@ -10,38 +10,81 @@ import "./App.css";
 
 export default function App() {
 
+  // Returns null (never throws) when the lookup is unavailable, times out, or
+  // comes back without usable coordinates. Callers skip the visit record.
   async function getVisitorLocation() {
-    const res = await 
-    fetch("https://ipapi.co/json/");
-    const data = await res.json();
-    return {
-      country: data.country_name,
-      latitude: data.latitude,
-      longitude: data.longitude,
-    };
-  }
-  async function updateCountryVisit() {
-    const loc = await getVisitorLocation();
-    const { data } = await supabase
-      .from("country_visits")
-      .select("*")
-      .eq("country", loc.country)
-      .single();
-      
-    if (data) {
-      await supabase
-        .from("country_visits")
-        .update({ count: data.count + 1 })
-        .eq("country", loc.country);
-    } else {
-      await supabase
-        .from("country_visits")
-        .insert({ country: loc.country,
-          latitude: loc.latitude,
-          longitude: loc.longitude,
-          count: 1,
-        });
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    try {
+
+      const res = await fetch("https://ipapi.co/json/", { signal: controller.signal });
+
+      if (!res.ok) {
+        console.error("Geolocation lookup failed:", res.status, res.statusText);
+        return null;
+      }
+
+      const data = await res.json();
+
+      // Rate-limited replies are HTTP 200 with { error: true, reason: "..." }.
+      if (data?.error) {
+        console.error("Geolocation lookup rejected:", data.reason ?? "unknown reason");
+        return null;
+      }
+
+      const country = data?.country_name;
+      const latitude = data?.latitude;
+      const longitude = data?.longitude;
+
+      if (!country || typeof latitude !== "number" || typeof longitude !== "number") {
+        console.error("Geolocation response missing country or coordinates; skipping visit record.");
+        return null;
+      }
+
+      return { country, latitude, longitude };
+
+    } catch (err) {
+      if (err?.name === "AbortError") {
+        console.error("Geolocation lookup timed out after 8s.");
+      } else {
+        console.error("Geolocation lookup failed:", err);
+      }
+      return null;
+    } finally {
+      clearTimeout(timeout);
     }
+
+  }
+
+  async function updateCountryVisit() {
+
+    try {
+
+      const loc = await getVisitorLocation();
+
+      // Already logged inside getVisitorLocation(). The countdown and the
+      // visitor counter are independent of this, so just stop here.
+      if (!loc) return;
+
+      // One atomic upsert in the database: increments an existing country or
+      // creates it. The client cannot supply a count, delete rows, or touch
+      // any row other than the one matching this country.
+      const { error: writeError } = await supabase.rpc("record_country_visit", {
+        p_country: loc.country,
+        p_latitude: loc.latitude,
+        p_longitude: loc.longitude,
+      });
+
+      if (writeError) {
+        console.error("Could not record country visit:", writeError.message);
+      }
+
+    } catch (err) {
+      console.error("Country visit tracking failed:", err);
+    }
+
   }
 
   
@@ -107,19 +150,32 @@ export default function App() {
   };
 
   const incrementVisitors = async () => {
-    
-    const { data } = await supabase
-      .from("visits")
-      .select("count")
-      .eq("id", 1)
-      .single();
-    const newCount = data.count + 1;
-    
-    await supabase      
-      .from("visits")
-      .update({ count: newCount })
-      .eq("id", 1);
-    setVisitors(newCount);
+
+    try {
+
+      // Atomic increment in the database, returning the new value. Replaces a
+      // read-then-write that lost updates under concurrent visitors. The client
+      // supplies no count and cannot target a different row.
+      const { data, error } = await supabase.rpc("increment_visit");
+
+      if (error) {
+        console.error("Visitor count unavailable:", error.message);
+        return;
+      }
+
+      const newCount = typeof data === "number" ? data : Number(data);
+
+      if (!Number.isFinite(newCount)) {
+        console.error("Visitor count returned no usable value.");
+        return;
+      }
+
+      setVisitors(newCount);
+
+    } catch (err) {
+      console.error("Visitor counter failed:", err);
+    }
+
   }
 
   const [time, setTime] = useState(calculateTime());
