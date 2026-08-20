@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&display=swap');
 
 * {
   margin: 0;
@@ -228,20 +228,179 @@ html, body, #root {
   height: 100dvh;
   width: 100%;
   background: #000;
+  /* the map route had no font-family and was inheriting :root's system-ui */
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-.map-page > .marvel-title {
+/*
+ * Status header. Reads as an instrument monitoring the map rather than a label
+ * above it: --measure is set from JS to the map's *drawn* width, so the rule and
+ * the corner brackets align with the geography, not with the SVG box.
+ */
+.map-status {
   flex: 0 0 auto;
-  /* shrink-wrap the text rather than stretching to the full page width, so the
-     scan sweep stays over the title instead of banding across the viewport */
-  align-self: center;
-  margin: 0;
-  padding: 0.4em 1em;
-  max-width: 100%;
+  position: relative;
+  width: 100%;
+  padding: clamp(6px, 1vh, 12px) clamp(8px, 2vw, 24px) clamp(12px, 1.6vh, 18px);
+  box-sizing: border-box;
+  --measure: min(100%, 1300px);
+  --ink: #F2F0EC;
+  --ink-2: rgba(242, 240, 236, 0.55);
+  --ink-3: rgba(242, 240, 236, 0.32);
+  --rule: rgba(242, 240, 236, 0.10);
 }
+
+.ms-frame {
+  position: relative;
+  width: var(--measure);
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.ms-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ms-sysid,
+.ms-regions {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.ms-sysid {
+  display: flex;
+  align-items: center;
+}
+
+/* Same primitive as the map markers and the arc reactor: a core inside a ring.
+   The 2s period matches the markers' <animate dur="2s">, so the header and every
+   marker on the map breathe on one clock. */
+.ms-pulse {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 auto;
+  margin-right: 9px;
+  border: 1px solid #ff3b3b;
+  border-radius: 50%;
+  position: relative;
+  animation: ms-pulse 2s ease-in-out infinite;
+}
+
+.ms-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 2px;
+  height: 2px;
+  border-radius: 50%;
+  background: #ff3b3b;
+}
+
+@keyframes ms-pulse {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  50%      { opacity: 0.3; transform: scale(1.35); }
+}
+
+/* The rule runs the map's full measure and breaks around the count. */
+.ms-readout {
+  display: flex;
+  align-items: center;
+  gap: clamp(10px, 1.6vw, 20px);
+  margin-top: clamp(4px, 0.8vh, 9px);
+}
+
+.ms-rule {
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--rule);
+}
+
+.ms-count {
+  font-size: clamp(24px, 3vw, 40px);
+  font-weight: 200;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Visually hidden, still announced. Carries the throttled count for screen
+   readers so the visible number can repaint freely. */
+.ms-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ms-lon {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.ms-caption {
+  margin-top: clamp(1px, 0.3vh, 4px);
+  text-align: center;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.42em;
+  text-indent: 0.42em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+
+/* Prime meridian: marks the map's true horizontal centre and hands off to it.
+   Absolutely placed, like the brackets, so neither steals height from the map. */
+.ms-meridian {
+  position: absolute;
+  left: 50%;
+  bottom: -11px;
+  transform: translateX(-50%);
+  width: 1px;
+  height: 9px;
+  background: linear-gradient(180deg, rgba(255, 59, 59, 0.38), rgba(255, 59, 59, 0));
+}
+
+.ms-brackets {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -11px;
+  height: 6px;
+}
+
+.ms-brackets span {
+  position: absolute;
+  top: 0;
+  width: 10px;
+  height: 6px;
+  border-color: rgba(242, 240, 236, 0.07);
+  border-style: solid;
+}
+
+.ms-brackets .ms-bl { left: 0;  border-width: 1px 0 0 1px; }
+.ms-brackets .ms-br { right: 0; border-width: 1px 1px 0 0; }
 
 .map-container {
   flex: 1 1 auto;
@@ -267,14 +426,43 @@ html, body, #root {
 }
 
 @media (max-width: 768px) {
-  h2.marvel-title {
-    font-size: 18px;
-    line-height: 1.2;
-    letter-spacing: 2px;
-    text-align: center;
+  .ms-lon,
+  .ms-brackets {
+    display: none;              /* too small to read; they only add noise */
+  }
 
-    color: #8CFF3F;
-    text-shadow: 0 0 4px rgba(140, 255, 63, 0.6), 0 0 10px rgba(140, 255, 63, 0.4);
+  .ms-sysid,
+  .ms-regions {
+    font-size: 9px;
+    letter-spacing: 0.18em;
+  }
+
+  .ms-caption {
+    letter-spacing: 0.34em;
+    text-indent: 0.34em;
+  }
+
+  /*
+   * Mobile layout fix. The map is width-constrained on a phone, so an SVG at
+   * height:100% left the drawn map floating in the middle of a very tall box --
+   * a large void between the header rule and the geography. Sizing the SVG by
+   * its own aspect ratio makes the container hug the map, so the map sits
+   * directly under the rule and the leftover space collects below it.
+   * Geometry, viewBox, projection and clipPath are untouched.
+   */
+  .map-container {
+    flex: 0 1 auto;
+    margin-bottom: auto;        /* with the header's auto top margin, the two   */
+  }                             /* split the slack evenly above and below, so   */
+                                /* header and map stay together and read as one */
+  .map-status {                 /* balanced group. The footer keeps the bottom. */
+    margin-top: auto;
+  }
+
+  .map-container svg {
+    height: auto;
+    aspect-ratio: 628.32 / 479.14;
+    max-height: 100%;
   }
 }
 
@@ -430,8 +618,13 @@ html, body, #root {
 @media (prefers-reduced-motion: reduce) {
   .arc-outer,
   .arc-inner,
-  .arc-core {
+  .arc-core,
+  .ms-pulse {
     animation: none;
+  }
+
+  .ms-pulse {
+    opacity: 0.6;
   }
 
   .map-footer {

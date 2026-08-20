@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { supabase } from "../supabase";
 import {
   ComposableMap,
@@ -34,6 +34,10 @@ const mercatorY = (lat) =>
 
 const round2 = (n) => Number(n.toFixed(2));
 
+// The visible count updates on every realtime event; the screen-reader live
+// region only re-announces this often.
+const ANNOUNCE_INTERVAL_MS = 20000;
+
 const MAP_WIDTH = round2(MAP_SCALE * 2 * Math.PI);
 const MAP_HEIGHT = round2(MAP_SCALE * (mercatorY(LAT_NORTH) - mercatorY(LAT_SOUTH)));
 
@@ -49,6 +53,50 @@ export default function GlobalMap() {
 
   const [locations, setLocations] = useState([]);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [visitors, setVisitors] = useState(null);
+  // Mirror of `visitors` that only advances on a throttle. The visible number
+  // updates instantly; this is what the live region announces, so a busy site
+  // cannot spam screen readers with one announcement per visitor.
+  const [announced, setAnnounced] = useState(null);
+  const lastAnnouncedAt = useRef(0);
+  const headerRef = useRef(null);
+  const containerRef = useRef(null);
+
+  const applyVisitorCount = useCallback((next) => {
+    if (typeof next !== "number" || !Number.isFinite(next)) return;
+    setVisitors(next);
+
+    const now = Date.now();
+    if (now - lastAnnouncedAt.current >= ANNOUNCE_INTERVAL_MS) {
+      lastAnnouncedAt.current = now;
+      setAnnounced(next);
+    }
+  }, []);
+
+  // Publish the map's *drawn* width as --measure so the header rule and the
+  // corner brackets line up with the geography rather than with the SVG box.
+  // preserveAspectRatio="meet" fits the viewBox inside the element, so the
+  // drawn width is min(boxWidth, boxHeight * viewBoxAspect).
+  useEffect(() => {
+    const box = containerRef.current;
+    const header = headerRef.current;
+    if (!box || !header) return;
+
+    const ratio = MAP_WIDTH / MAP_HEIGHT;
+
+    const sync = () => {
+      const cs = getComputedStyle(box);
+      const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+      const boxW = Math.min(box.clientWidth - padX, 1300);
+      const drawn = Math.min(boxW, box.clientHeight * ratio);
+      if (drawn > 0) header.style.setProperty("--measure", `${drawn.toFixed(1)}px`);
+    };
+
+    const ro = new ResizeObserver(sync);
+    ro.observe(box);
+    sync();
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -73,7 +121,29 @@ export default function GlobalMap() {
 
     }
 
+    // Read-only. The map page never increments the counter -- that is the
+    // countdown page's job, via the increment_visit() RPC.
+    async function fetchVisitorTotal() {
+
+      const { data, error } = await supabase
+        .from("visits")
+        .select("count")
+        .eq("id", 1)
+        .single();
+
+      if (cancelled) return;
+
+      if (error || !data) {
+        console.error("Visitor total unavailable:", error?.message ?? "no row");
+        return;
+      }
+
+      applyVisitorCount(data.count);
+
+    }
+
     fetchLocations();
+    fetchVisitorTotal();
 
     // Merge on `country`, the table's primary key: a row we already hold is
     // updated in place, an unseen one is appended. This also stops a realtime
@@ -111,11 +181,41 @@ export default function GlobalMap() {
         )
         .subscribe();
 
+    /*
+     * Separate channel on purpose. `visits` is only delivered if it has been
+     * added to the supabase_realtime publication; if it has not, the server
+     * rejects the binding and tears down the whole channel it belongs to. Kept
+     * apart, a rejection costs only the live count -- the map's country
+     * subscription is unaffected, and the count still shows the value fetched
+     * on load.
+     */
+    const visitsChannel = supabase
+        .channel("realtime-visits")
+        .on(
+            "postgres_changes",
+            {
+                event: "UPDATE",
+                schema: "public",
+                table: "visits",
+                filter: "id=eq.1",
+            },
+            (payload) => applyVisitorCount(payload.new?.count)
+        )
+        .subscribe((status) => {
+            if (status === "CHANNEL_ERROR" || status === "TIMED_OUT") {
+                console.info(
+                    "Live visitor count unavailable: Realtime is not enabled for public.visits. " +
+                    "Showing the total fetched on load."
+                );
+            }
+        });
+
     return () => {
         cancelled = true;
         supabase.removeChannel(channel);
+        supabase.removeChannel(visitsChannel);
     };
-  }, []);
+  }, [applyVisitorCount]);
 
   useEffect(() => {
     document.title = "MCU Fan Network";
@@ -125,8 +225,52 @@ export default function GlobalMap() {
 
     <div className="map-page">
 
-      <h2 className="marvel-title">Marvel Fans Watching Worldwide</h2>
-      <div className="map-container">
+      <header className="map-status" ref={headerRef}>
+        <div className="ms-frame">
+
+          <div className="ms-topbar">
+            <span className="ms-sysid">
+              <span className="ms-pulse" aria-hidden="true" />
+              Global Fan Network
+            </span>
+            <span className="ms-regions">
+              {locations.length} {locations.length === 1 ? "Region" : "Regions"} Tracking
+            </span>
+          </div>
+
+          <div className="ms-readout">
+            <span className="ms-lon" aria-hidden="true">&#8722;180&#176;</span>
+            <span className="ms-rule" aria-hidden="true" />
+            {/* The number itself is hidden from assistive tech: it repaints on
+                every realtime event. The throttled live region below carries the
+                value instead, so screen readers are not spammed. */}
+            <p className="ms-count" aria-hidden="true">
+              {visitors === null ? "—" : visitors.toLocaleString()}
+            </p>
+            <span className="ms-rule" aria-hidden="true" />
+            <span className="ms-lon" aria-hidden="true">+180&#176;</span>
+          </div>
+
+          <h1 className="ms-caption">Fans Watching</h1>
+
+          <p className="ms-live" aria-live="polite">
+            {announced === null
+              ? "Loading visitor total"
+              : `${announced.toLocaleString()} fans watching worldwide across ` +
+                `${locations.length} ${locations.length === 1 ? "region" : "regions"}`}
+          </p>
+
+          <span className="ms-meridian" aria-hidden="true" />
+
+          <div className="ms-brackets" aria-hidden="true">
+            <span className="ms-bl" />
+            <span className="ms-br" />
+          </div>
+
+        </div>
+      </header>
+
+      <div className="map-container" ref={containerRef}>
       <ComposableMap
         projection="geoMercator"
         width={MAP_WIDTH}
