@@ -3,6 +3,7 @@ import { FaLinkedin, FaInstagram } from "react-icons/fa";
 import { supabase } from "./supabase";
 import { Link } from "react-router-dom";
 import { startDynamicFavicon } from "./dynamicFavicon";
+import { createTickEngine, tickLevel } from "./tickSound";
 import { Share2 } from "lucide-react";
 import { Outlet } from "react-router-dom";
 import ArcCursor from "./ArcCursor";
@@ -90,7 +91,8 @@ export default function App() {
   
   const releaseDate = new Date("2026-12-18T00:00:00Z");
 
-  const tickRef = useRef(null);
+  const tickEngineRef = useRef(null);
+  const lastTickSecondRef = useRef(null);
 
 
   const calculateTime = () => {
@@ -180,27 +182,81 @@ export default function App() {
 
   const [time, setTime] = useState(calculateTime());
   const [soundEnabled, setSoundEnabled] = useState(false);
+  const [reduceMotion, setReduceMotion] = useState(false);
   const [visitors, setVisitors] = useState(0);
 
+  /*
+   * One clock drives both the display and the sound.
+   *
+   * Polling at 250ms instead of 1000ms keeps the visible seconds within a
+   * quarter second of the true boundary rather than letting setInterval drift,
+   * and setTime bails out when the rendered value has not changed, so this
+   * still causes exactly one re-render per second.
+   *
+   * The tick fires from the same value that gets rendered, gated on the seconds
+   * field actually changing. Audio therefore cannot drift away from the
+   * display: a late or duplicated poll re-renders nothing and plays nothing.
+   */
   useEffect(() => {
 
-    tickRef.current = new Audio("/tick.mp3");
-    tickRef.current.volume = 0.4;
+    const sameDisplay = (a, b) =>
+      a.isReleased === b.isReleased && a.months === b.months && a.days === b.days &&
+      a.hours === b.hours && a.minutes === b.minutes && a.seconds === b.seconds;
 
     const timer = setInterval(() => {
 
-      setTime(calculateTime());
+      const next = calculateTime();
 
-      if (soundEnabled && tickRef.current) {
-        tickRef.current.currentTime = 0;
-        tickRef.current.play().catch(() => {});
+      setTime((prev) => (sameDisplay(prev, next) ? prev : next));
+
+      if (next.seconds !== lastTickSecondRef.current) {
+        lastTickSecondRef.current = next.seconds;
+        // Reduced motion suppresses the audio only. The clock above has already
+        // been updated, so the countdown keeps running and repainting normally.
+        if (soundEnabled && !reduceMotion) {
+          tickEngineRef.current?.tick(tickLevel(next));
+        }
       }
 
-    }, 1000);
+    }, 250);
 
     return () => clearInterval(timer);
 
-  }, [soundEnabled]);
+  }, [soundEnabled, reduceMotion]);
+
+  /* Audio engine: created once, torn down on unmount. */
+  useEffect(() => {
+    const engine = createTickEngine();
+    tickEngineRef.current = engine;
+
+    // Browsers suspend the context when the tab is hidden; bring it back.
+    const onVisible = () => {
+      if (!document.hidden) engine.resumeIfNeeded();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      document.removeEventListener("visibilitychange", onVisible);
+      engine.dispose();
+      tickEngineRef.current = null;
+    };
+  }, []);
+
+  /*
+   * Visitors who ask their OS for reduced motion are opted out of the ticking
+   * audio: a sound that repeats every second for the whole visit is exactly the
+   * kind of continuous, unrequested effect that preference is asking us to stop.
+   * The countdown itself is untouched -- it still runs, repaints and escalates;
+   * only the tick is silenced. Reacting to `change` means toggling the OS
+   * setting takes effect immediately, without a reload.
+   */
+  useEffect(() => {
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => setReduceMotion(mq.matches);
+    sync();
+    mq.addEventListener("change", sync);
+    return () => mq.removeEventListener("change", sync);
+  }, []);
 
   useEffect(() => {
     startDynamicFavicon();
@@ -268,7 +324,12 @@ export default function App() {
       
     <div
       className="fullscreen"
-      onClick={() => setSoundEnabled(true)}
+      onClick={() => {
+        // Reduced motion: never even open an AudioContext for this visitor.
+        if (reduceMotion) return;
+        setSoundEnabled(true);
+        tickEngineRef.current?.unlock();
+      }}
     >
 
       {/* Social Icons */}
