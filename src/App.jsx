@@ -9,6 +9,15 @@ import { Outlet } from "react-router-dom";
 import ArcCursor from "./ArcCursor";
 import "./App.css";
 
+/*
+ * Visit tracking runs once per page load, not once per mount. Navigating
+ * / -> /map -> / remounts App, and each return trip used to count the same
+ * visitor again and repeat the geolocation lookup. Module scope survives the
+ * remount; a real reload resets it, which is still one visit per load.
+ */
+let visitRecorded = false;
+let lastVisitorCount = 0;
+
 export default function App() {
 
   // Returns null (never throws) when the lookup is unavailable, times out, or
@@ -126,10 +135,11 @@ export default function App() {
     }
 
     if (days < 0) {
+      // Date.UTC, not new Date(y, m, 0): the local-time constructor builds
+      // midnight in the visitor's timezone, which east of UTC reads back via
+      // getUTCDate() as the day before -- November came out as 29 days.
       const prevMonthDays = new Date(
-        end.getUTCFullYear(),
-        end.getUTCMonth(),
-        0
+        Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), 0)
       ).getUTCDate();
 
       days += prevMonthDays;
@@ -172,6 +182,7 @@ export default function App() {
         return;
       }
 
+      lastVisitorCount = newCount;
       setVisitors(newCount);
 
     } catch (err) {
@@ -180,10 +191,36 @@ export default function App() {
 
   }
 
+  // Read-only refresh for a remount: shows visitors who arrived while this
+  // page was away, without counting this visitor a second time.
+  const refreshVisitors = async () => {
+
+    try {
+
+      const { data, error } = await supabase
+        .from("visits")
+        .select("count")
+        .eq("id", 1)
+        .single();
+
+      if (error || !data) return;   // keep showing the last known value
+
+      const count = Number(data.count);
+      if (!Number.isFinite(count)) return;
+
+      lastVisitorCount = count;
+      setVisitors(count);
+
+    } catch (err) {
+      console.error("Visitor count refresh failed:", err);
+    }
+
+  };
+
   const [time, setTime] = useState(calculateTime());
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
-  const [visitors, setVisitors] = useState(0);
+  const [visitors, setVisitors] = useState(lastVisitorCount);
 
   /*
    * One clock drives both the display and the sound.
@@ -292,10 +329,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    incrementVisitors();
-  }, []);
+    // No backend configured (see supabase.js): the countdown runs without it.
+    if (!supabase) return;
 
-  useEffect(() => {
+    if (visitRecorded) {
+      refreshVisitors();
+      return;
+    }
+
+    // Set before the requests go out, so nothing can start a second round.
+    visitRecorded = true;
+    incrementVisitors();
     updateCountryVisit();
   }, []);
 

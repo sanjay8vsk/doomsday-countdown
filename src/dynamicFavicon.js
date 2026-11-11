@@ -1,4 +1,14 @@
+/*
+ * One animation per page load. App calls this on mount, and App remounts every
+ * time you navigate back to / -- each call used to start another interval that
+ * was never cleared, so the favicon spun faster and burned more CPU per trip.
+ */
+let started = false;
+
 export function startDynamicFavicon() {
+  if (started) return;
+  started = true;
+
   let angle = 0;
 
   const isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches;

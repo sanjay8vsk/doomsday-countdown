@@ -107,6 +107,9 @@ export default function GlobalMap() {
   }, []);
 
   useEffect(() => {
+    // No backend configured (see supabase.js): draw the map without data.
+    if (!supabase) return;
+
     let cancelled = false;
 
     async function fetchLocations() {
