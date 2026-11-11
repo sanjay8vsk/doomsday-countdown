@@ -2,15 +2,41 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <!-- <link rel="icon" type="image/svg+xml" href="/vite.svg" /> -->
-    <!-- No static icon: /favicon.png does not exist, and the SPA rewrite answered
-         the request with index.html (HTTP 200, text/html) instead of a 404.
-         startDynamicFavicon() in src/dynamicFavicon.js creates the
-         <link rel="icon"> itself and keeps it updated. -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>⚡ Doomsday Countdown</title>
+    <meta name="description" content="A live countdown to Doomsday on 18 December 2026, with a real-time map of fans counting down around the world." />
+    <meta name="theme-color" content="#000000" />
+
+    <!-- Link previews (WhatsApp, iMessage, X, LinkedIn, Discord, Slack...).
+         Crawlers do not run JavaScript, so these must be in the static HTML.
+         og:image must be an absolute URL. No og:url or canonical on purpose:
+         this one file is served for every route, so they would claim /map is
+         the home page; without them each platform uses the URL actually shared. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Doomsday Countdown" />
+    <meta property="og:title" content="Doomsday Is Coming · Live Countdown" />
+    <meta property="og:description" content="Counting down to 18 December 2026. See where fans are watching from on the live global map." />
+    <meta property="og:image" content="https://doomsday-countdown.vercel.app/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Doomsday is coming: 18.12.2026. Join the global countdown." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Doomsday Is Coming · Live Countdown" />
+    <meta name="twitter:description" content="Counting down to 18 December 2026. See where fans are watching from on the live global map." />
+    <meta name="twitter:image" content="https://doomsday-countdown.vercel.app/og-image.jpg" />
+    <meta name="twitter:image:alt" content="Doomsday is coming: 18.12.2026. Join the global countdown." />
+
+    <!-- Static icon for everything that does not run JavaScript: link previews,
+         bookmarks, search results, the first paint. startDynamicFavicon() in
+         src/dynamicFavicon.js picks up this same <link> and animates it.
+         /favicon.ico exists too, for clients that request it directly (it used
+         to fall through the SPA rewrite and come back as this HTML page). -->
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   </head>
   <body>
     <div id="root"></div>

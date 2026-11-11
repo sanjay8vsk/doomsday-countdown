@@ -332,7 +332,12 @@ export default function App() {
     // No backend configured (see supabase.js): the countdown runs without it.
     if (!supabase) return;
 
-    if (visitRecorded) {
+    // `npm run dev` uses the production database (.env), and every reload and
+    // Fast Refresh used to record a visit: by Nov 2026, 755 of the 776 visits
+    // with a country were Sweden, where development happens. In dev, show the
+    // real total read-only and record nothing. `vite preview` is a production
+    // build and still tracks, for testing the tracking path itself.
+    if (import.meta.env.DEV || visitRecorded) {
       refreshVisitors();
       return;
     }

@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import App from "./App";
 import GlobalMap from "./pages/GlobalMap";
+import NotFound from "./pages/NotFound";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import ArcCursor from "./ArcCursor";
@@ -15,6 +16,8 @@ ReactDOM.createRoot(document.getElementById("root")).render(
       <Route path="/" element={<App />} />
       
       <Route path="/map" element={<GlobalMap />} />
+
+      <Route path="*" element={<NotFound />} />
     </Routes>
   </BrowserRouter>
 

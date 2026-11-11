@@ -17,7 +17,20 @@ html, body, #root {
   position: relative;
   height: 100vh;
   width: 100vw;
-  background: url("/avengers.jpg") no-repeat center center;
+  /*
+   * Was one 5120x2880, 5.5 MB JPEG: 96% of the page's bytes, ~29 s to arrive on
+   * a slow mobile connection. Now 2560px landscape / 1080x1920 portrait, WebP
+   * (112 / 197 KB) with JPEG fallbacks. Browsers without image-set() type()
+   * support drop that declaration and keep the plain JPEG above it.
+   *
+   * #000 underneath: with no colour here the page showed the body background
+   * while the image loaded -- white in light mode, under white text.
+   */
+  background: #000 url("/bg/avengers-2560.jpg") no-repeat center center;
+  background-image: image-set(
+    url("/bg/avengers-2560.webp") type("image/webp"),
+    url("/bg/avengers-2560.jpg") type("image/jpeg")
+  );
   background-size: cover;
   display: flex;
   justify-content: center;
@@ -25,6 +38,18 @@ html, body, #root {
   font-family: 'Inter Tight', sans-serif;
   color: white;
   overflow: hidden;
+}
+
+/* Portrait screens: the centre slice of the same artwork, cut to 9:16. It is
+   the region `cover` was already showing on phones, at a fraction of the size. */
+@media (max-aspect-ratio: 3/4) {
+  .fullscreen {
+    background-image: url("/bg/avengers-portrait.jpg");
+    background-image: image-set(
+      url("/bg/avengers-portrait.webp") type("image/webp"),
+      url("/bg/avengers-portrait.jpg") type("image/jpeg")
+    );
+  }
 }
 
 /* Dark cinematic overlay */
@@ -631,4 +656,59 @@ html, body, #root {
     animation: none;
     opacity: 1;            /* the fade-in never runs, so show it outright */
   }
+}
+
+/*
+ * 404 page. Same ink and type as the map page; the number is styled like the
+ * countdown digits so it reads as part of the same instrument.
+ */
+.not-found {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 24px;
+  text-align: center;
+  background: #000;
+  color: #F2F0EC;
+  font-family: 'Inter Tight', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.nf-code {
+  font-size: clamp(72px, 16vw, 150px);
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+}
+
+.nf-title {
+  font-size: clamp(11px, 1.4vw, 14px);
+  font-weight: 500;
+  line-height: 1.6;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(242, 240, 236, 0.55);
+}
+
+.nf-link,
+.nf-link:hover {
+  margin-top: 14px;
+  padding-bottom: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #F2F0EC;
+  border-bottom: 1px solid rgba(242, 240, 236, 0.35);
+}
+
+.nf-link:hover,
+.nf-link:focus-visible {
+  border-bottom-color: #F2F0EC;
 }
